@@ -10,9 +10,22 @@ param addressPrefixes array = [
   '10.0.0.0/16'
 ]
 
+module rg 'modules/Microsoft.Resources/resourceGroups/deploy.bicep' = {
+  name: '${uniqueString(deployment().name)}-${env}-${suffix}'
+  scope: subscription(subscriptionId)
+  params: {
+    // Required parameters
+    name: rgName
+    location: location
+  }
+}
+
 module vnet 'modules/Microsoft.Network/virtualNetworks/deploy.bicep' = {
   name: '${uniqueString(deployment().name, location)}-${env}-msdn'
   scope: resourceGroup(subscriptionId, rgName)
+  dependsOn: [
+    rg
+  ]
   params: {
     // Required parameters
     addressPrefixes: addressPrefixes
